@@ -1,27 +1,27 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
+import "@whereby.com/browser-sdk/embed"; // Import the Whereby embed web component
 import './CallWindow.css';
 
 interface CallWindowProps {
-  meetLink: string;
+  meetLink: string; // This will actually be the Whereby room URL
 }
 
 const CallWindow: React.FC<CallWindowProps> = ({ meetLink }) => {
-  const webviewRef = useRef<any>(null);
-
-  useEffect(() => {
-    if (webviewRef.current && meetLink) {
-      webviewRef.current.src = meetLink;
-    }
-  }, [meetLink]);
-
   return (
-    <div className="call-window">
-      <webview
-        ref={webviewRef}
-        src={meetLink}
-        style={{ width: '100%', height: '100%' }}
-        allowFullScreen
-      />
+    <div className="call-window-container">
+      {meetLink ? (
+        <whereby-embed
+          room={meetLink}
+          className="whereby-embed"
+          // You can add other Whereby embed attributes here if needed
+          // For example:
+          // style={{ width: '100%', height: '100%' }}
+        ></whereby-embed>
+      ) : (
+        <div className="no-meet-link">
+          Please provide a Whereby room link to start the call.
+        </div>
+      )}
     </div>
   );
 };

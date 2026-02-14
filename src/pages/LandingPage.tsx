@@ -1,23 +1,33 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import WherebyService from '../services/WherebyService'; // Import WherebyService
 
 const LandingPage: React.FC = () => {
-  const [meetLink, setMeetLink] = useState<string>('');
+  // Remove meetLink state as Whereby creates the room
   const [contextText, setContextText] = useState<string>('');
   const [contextFiles, setContextFiles] = useState<FileList | null>(null);
   const navigate = useNavigate();
 
-  const handleJoinCall = () => {
-    if (meetLink) {
+  // Instantiate WherebyService
+  const [wherebyService] = useState(() => new WherebyService());
+
+
+  const handleJoinCall = async () => {
+    try {
+      // Calculate endDate for Whereby room (e.g., 1 hour from now)
+      const endDate = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+      const roomUrl = await wherebyService.createMeetingRoom(endDate);
+      console.log('Created Whereby room:', roomUrl);
       navigate('/call', {
         state: {
-          meetLink,
+          roomUrl, // Pass roomUrl directly
           contextText,
           contextFiles: contextFiles ? Array.from(contextFiles) : undefined,
         },
       });
-    } else {
-      alert('Please enter a Google Meet link.');
+    } catch (error) {
+      console.error('Error creating Whereby room:', error);
+      alert('Failed to create Whereby meeting room. Please try again.');
     }
   };
 
@@ -28,18 +38,6 @@ const LandingPage: React.FC = () => {
   return (
     <div style={{ padding: '20px', maxWidth: '500px', margin: 'auto', fontFamily: 'Arial, sans-serif' }}>
       <h1>Welcome to meetingmAIte</h1>
-      <div style={{ marginBottom: '15px' }}>
-        <label htmlFor="meet-link" style={{ display: 'block', marginBottom: '5px' }}>Google Meet Link:</label>
-        <input
-          type="text"
-          id="meet-link"
-          name="meetLink"
-          placeholder="e.g., https://meet.google.com/abc-defg-hij"
-          value={meetLink}
-          onChange={(e) => setMeetLink(e.target.value)}
-          style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
-        />
-      </div>
       <div style={{ marginBottom: '15px' }}>
         <label htmlFor="context-text" style={{ display: 'block', marginBottom: '5px' }}>Meeting Context (optional):</label>
         <textarea
@@ -75,7 +73,7 @@ const LandingPage: React.FC = () => {
           cursor: 'pointer',
         }}
       >
-        Join Call
+        Create and Join Call
       </button>
     </div>
   );

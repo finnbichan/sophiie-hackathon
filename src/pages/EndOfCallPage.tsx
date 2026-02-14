@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import InteractionWindow from '../components/InteractionWindow';
-import GeminiService from '../services/GeminiService';
+import GroqService from '../services/GroqService';
 import './EndOfCallPage.css';
 
 interface Message {
@@ -31,9 +31,9 @@ const EndOfCallPage: React.FC = () => {
   ]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Initialize Gemini service
-  const [geminiService] = useState(
-    () => new GeminiService(process.env.REACT_APP_GEMINI_API_KEY)
+  // Initialize Interaction service
+  const [groqService] = useState(
+    () => new GroqService()
   );
 
   const [actions] = useState<Action[]>([
@@ -56,8 +56,8 @@ const EndOfCallPage: React.FC = () => {
     setMessages([...messages, newMessage]);
     setIsLoading(true);
 
-    // Call Gemini API for response
-    geminiService
+    // Call Interaction service for response
+    groqService
       .chat(text)
       .then((response) => {
         const agentMessage: Message = {

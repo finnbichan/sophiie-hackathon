@@ -1,6 +1,21 @@
-.call-window {
+.call-window-container {
   width: 100%;
   height: 100%;
   border: 1px solid #ddd;
   background: #000;
+  display: flex; /* Ensure flexbox for centering content */
+  justify-content: center; /* Center content horizontally */
+  align-items: center; /* Center content vertically */
+}
+
+.whereby-embed {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.no-meet-link {
+  color: #fff;
+  font-size: 1.2em;
+  text-align: center;
 }

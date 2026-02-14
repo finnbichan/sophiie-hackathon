@@ -15,8 +15,8 @@ module.exports = {
   plugins: [
     ...plugins,
     new webpack.DefinePlugin({
-      'process.env.REACT_APP_GEMINI_API_KEY': JSON.stringify(
-        process.env.REACT_APP_GEMINI_API_KEY
+      'process.env.REACT_APP_GROQ_API_KEY': JSON.stringify(
+        process.env.REACT_APP_GROQ_API_KEY
       ),
     }),
   ],

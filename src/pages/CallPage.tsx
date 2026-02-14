@@ -4,7 +4,7 @@ import CallWindow from '../components/CallWindow';
 import TranscriptWindow from '../components/TranscriptWindow';
 import ActionWindow from '../components/ActionWindow';
 import InteractionWindow from '../components/InteractionWindow';
-import GeminiService from '../services/GeminiService';
+import GroqService from '../services/GroqService';
 import './CallPage.css';
 
 interface TranscriptEntry {
@@ -34,8 +34,8 @@ interface Message {
 const CallPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { meetLink, contextText, contextFiles } = (location.state || {}) as {
-    meetLink?: string;
+  const { roomUrl, contextText, contextFiles } = (location.state || {}) as {
+    roomUrl?: string;
     contextText?: string;
     contextFiles?: File[];
   };
@@ -46,14 +46,10 @@ const CallPage: React.FC = () => {
   const [isWhisperMode, setIsWhisperMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Initialize Gemini service
-  const [geminiService] = useState(
-    () => new GeminiService(process.env.REACT_APP_GEMINI_API_KEY)
+  // Initialize Interaction service
+  const [groqService] = useState(
+    () => new GroqService()
   );
-
-  if (!meetLink) {
-    return <div className="error-message">Error: No meeting link provided.</div>;
-  }
 
   // Mock function to handle sending messages
   const handleSendMessage = (text: string) => {
@@ -70,8 +66,8 @@ const CallPage: React.FC = () => {
     setMessages([...messages, newMessage]);
     setIsLoading(true);
 
-    // Call Gemini API for response
-    geminiService
+    // Call Interaction service for response
+    groqService
       .chat(text)
       .then((response) => {
         const agentMessage: Message = {
@@ -137,65 +133,49 @@ const CallPage: React.FC = () => {
         .map((t) => `${t.speaker}: ${t.text}`)
         .join('\n');
 
-      geminiService.setTranscriptContext(transcriptText);
-
-      /*geminiService
-        .generateSuggestions(transcriptText)
-        .then((suggestions) => {
-          const newActions: Action[] = (suggestions || []).map(
-            (suggestion, index) => ({
-              id: `action-${index}`,
-              type: (suggestion.type as 'suggestion' | 'reminder' | 'context' | 'question') || 'suggestion',
-              title: suggestion.title,
-              description: suggestion.description,
-              requiresApproval: suggestion.type === 'reminder',
-              onApprove: () =>
-                console.log('Approved:', suggestion.title),
-              onDeny: () =>
-                console.log('Denied:', suggestion.title),
-            })
-          );
-          setActions(newActions);
-        })
-        .catch((error) =>
-          console.error('Error generating suggestions:', error)
-        );*/
+      // Future: transcript-aware features handled by separate audio service
     }
-  }, [transcripts.length, actions.length]);
+  }, [transcripts.length, actions.length, groqService]);
 
   return (
-    <div className="call-page">
-      <div className="call-header">
-        <div className="call-title">Meeting in Progress</div>
-        <button
-          onClick={() => navigate('/end-of-call')}
-          className="end-call-button"
-        >
-          End Call
-        </button>
-      </div>
-      <div className="call-container">
-        <div className="call-left">
-          <CallWindow meetLink={meetLink} />
+    <>
+      {roomUrl ? (
+        <div className="call-page">
+          <div className="call-header">
+            <div className="call-title">Meeting in Progress</div>
+            <button
+              onClick={() => navigate('/end-of-call')}
+              className="end-call-button"
+            >
+              End Call
+            </button>
+          </div>
+          <div className="call-container">
+            <div className="call-left">
+              <CallWindow meetLink={roomUrl} />
+            </div>
+            <div className="call-right">
+              <div className="call-right-top">
+                <TranscriptWindow transcripts={transcripts} />
+              </div>
+              <div className="call-right-middle">
+                <ActionWindow actions={actions} />
+              </div>
+              <div className="call-right-bottom">
+                <InteractionWindow
+                  messages={messages}
+                  onSendMessage={handleSendMessage}
+                  isLoading={isLoading}
+                  isWhisperMode={isWhisperMode}
+                />
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="call-right">
-          <div className="call-right-top">
-            <TranscriptWindow transcripts={transcripts} />
-          </div>
-          <div className="call-right-middle">
-            <ActionWindow actions={actions} />
-          </div>
-          <div className="call-right-bottom">
-            <InteractionWindow
-              messages={messages}
-              onSendMessage={handleSendMessage}
-              isLoading={isLoading}
-              isWhisperMode={isWhisperMode}
-            />
-          </div>
-        </div>
-      </div>
-    </div>
+      ) : (
+        <div className="error-message">Error: No Whereby room link provided.</div>
+      )}
+    </>
   );
 };
 
