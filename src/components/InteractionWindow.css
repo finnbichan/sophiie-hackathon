@@ -1,0 +1,122 @@
+.interaction-window {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border: 1px solid #ddd;
+  background: #fff;
+  overflow: hidden;
+}
+
+.interaction-header {
+  padding: 12px;
+  font-weight: bold;
+  border-bottom: 1px solid #ddd;
+  background: #f5f5f5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.whisper-badge {
+  font-size: 0.8em;
+  background: #9c27b0;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-weight: normal;
+}
+
+.interaction-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.interaction-empty {
+  color: #999;
+  text-align: center;
+  padding: 40px 12px;
+  font-style: italic;
+  margin: auto;
+}
+
+.interaction-message {
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  max-width: 95%;
+}
+
+.interaction-message.interaction-user {
+  align-self: flex-end;
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.interaction-message.interaction-agent {
+  align-self: flex-start;
+  background: #f5f5f5;
+  color: #666;
+}
+
+.message-role {
+  font-weight: bold;
+}
+
+.message-time {
+  font-size: 0.75em;
+  color: #999;
+  margin-left: 8px;
+}
+
+.message-text {
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.message-loading {
+  font-style: italic;
+  color: #999;
+}
+
+.interaction-input {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid #ddd;
+  background: #fafafa;
+}
+
+.interaction-input-field {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.interaction-input-field:disabled {
+  background: #e0e0e0;
+  cursor: not-allowed;
+}
+
+.interaction-send-btn {
+  padding: 8px 16px;
+  background: #2196f3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.interaction-send-btn:disabled {
+  background: #bdbdbd;
+  cursor: not-allowed;
+}
+
+.interaction-send-btn:hover:not(:disabled) {
+  background: #1976d2;
+}
