@@ -13,6 +13,7 @@ interface InteractionWindowProps {
   onSendMessage: (text: string) => void;
   isLoading?: boolean;
   isWhisperMode?: boolean;
+  whisper?: string; // New prop for current whisper text
 }
 
 const InteractionWindow: React.FC<InteractionWindowProps> = ({
@@ -20,6 +21,8 @@ const InteractionWindow: React.FC<InteractionWindowProps> = ({
   onSendMessage,
   isLoading = false,
   isWhisperMode = false,
+  whisper = '',
+
 }) => {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -31,6 +34,26 @@ const InteractionWindow: React.FC<InteractionWindowProps> = ({
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    if (isWhisperMode) {
+       setInput(whisper);
+    }
+  }, [isWhisperMode, whisper]);
+
+    useEffect(() => {
+      const handleKeyUp = (e: KeyboardEvent) => {
+        if (e.key === 'Enter' || (e.key.toLowerCase() === 'p' && isWhisperMode)) {
+          handleSend();
+        }
+      };
+
+      window.addEventListener('keyup', handleKeyUp);
+  
+      return () => {
+        window.removeEventListener('keyup', handleKeyUp);
+      };
+    }, [isWhisperMode, input]);
 
   const handleSend = () => {
     if (input.trim()) {
@@ -72,9 +95,8 @@ const InteractionWindow: React.FC<InteractionWindowProps> = ({
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && handleSend()}
           placeholder={isWhisperMode ? 'Listening...' : 'Type a message...'}
-          disabled={isLoading || isWhisperMode}
+          disabled={isLoading}
           className="interaction-input-field"
         />
         <button

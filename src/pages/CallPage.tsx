@@ -45,6 +45,7 @@ const CallPage: React.FC = () => {
   const [actions, setActions] = useState<Action[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [isWhisperMode, setIsWhisperMode] = useState(false);
+  const [whisper, setWhisper] = useState(''); // State for current whisper input
   const [isLoading, setIsLoading] = useState(false);
   const [audioStream, setAudioStream] = useState<MediaStream | null>(null); // New state for audio stream
 
@@ -66,18 +67,24 @@ const CallPage: React.FC = () => {
 
   // Handler for receiving transcription results
   const handleTranscriptResult = useCallback((transcript: string) => {
+    console.log("whisper", isWhisperMode, transcript)
     console.log('Received transcript:', transcript);
     // For simplicity, add as a new entry. In real app, you might aggregate partials.
-    setTranscripts((prev) => [
-      ...prev,
-      {
-        id: `transcript-${Date.now()}`,
-        speaker: 'Participant', // TODO: Identify speaker
-        text: transcript,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      },
-    ]);
-  }, []);
+    if(isWhisperMode) {
+      setWhisper((prev) => prev + transcript);
+      console.log("Updated whisper state:", transcript);
+    } else {
+      setTranscripts((prev) => [
+        ...prev,
+        {
+          id: `transcript-${Date.now()}`,
+          speaker: 'Participant', // TODO: Identify speaker
+          text: transcript,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        },
+      ]);
+    }
+  }, [isWhisperMode]);
 
   // Effect to start/stop transcription when audioStream changes
   useEffect(() => {
@@ -150,6 +157,7 @@ const CallPage: React.FC = () => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key.toLowerCase() === 'p' && !isWhisperMode) {
         setIsWhisperMode(true);
+        console.log('Whisper mode activated', isWhisperMode);
         // TODO: Auto-mute in Google Meet
         // TODO: Start voice dictation
       }
@@ -158,8 +166,8 @@ const CallPage: React.FC = () => {
     const handleKeyUp = (e: KeyboardEvent) => {
       if (e.key.toLowerCase() === 'p' && isWhisperMode) {
         setIsWhisperMode(false);
-        // TODO: Stop voice dictation
-        // TODO: Unmute in Google Meet
+        console.log('Whisper mode deactivated');
+        setWhisper(''); // Clear whisper text when exiting whisper mode
       }
     };
 
@@ -213,6 +221,7 @@ const CallPage: React.FC = () => {
                   onSendMessage={handleSendMessage}
                   isLoading={isLoading}
                   isWhisperMode={isWhisperMode}
+                  whisper={whisper}
                 />
               </div>
             </div>
