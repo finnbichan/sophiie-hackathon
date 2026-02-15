@@ -9,6 +9,7 @@ class AudioProcessor {
   private mediaStreamSource: MediaStreamAudioSourceNode | null = null;
   private scriptProcessor: ScriptProcessorNode | null = null;
   private ipcRenderer: MinimalIpcRenderer | null = null; // Use MinimalIpcRenderer type
+  private mediaStream: MediaStream | null = null; // Reintroduce to store the stream
   private readonly audioDataChannel = 'audio-data';
   private readonly targetSampleRate = 16000; // Deepgram's expected sample rate
 
@@ -24,6 +25,7 @@ class AudioProcessor {
     }
 
     this.ipcRenderer = ipcRendererInstance;
+    this.mediaStream = stream; // Store the stream
 
     this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     console.log('AudioProcessor: AudioContext sample rate:', this.audioContext.sampleRate);
@@ -34,7 +36,14 @@ class AudioProcessor {
     this.scriptProcessor = this.audioContext.createScriptProcessor(4096, 1, 1);
 
     this.scriptProcessor.onaudioprocess = (event: AudioProcessingEvent) => {
-      if (!this.ipcRenderer) return;
+      if (!this.ipcRenderer || !this.mediaStream) return;
+
+      const audioTrack = this.mediaStream.getAudioTracks()[0];
+      if (!audioTrack || !audioTrack.enabled) {
+        // If audio track is not enabled (e.g., muted), do not send data
+        // console.log('AudioProcessor: Audio track disabled, skipping audio data send.');
+        return;
+      }
 
       // Get input audio data
       const inputBuffer = event.inputBuffer.getChannelData(0);
@@ -85,6 +94,7 @@ class AudioProcessor {
       this.audioContext = null;
     }
     this.ipcRenderer = null;
+    this.mediaStream = null; // Clear the stream reference
     console.log('AudioProcessor stopped.');
   }
 

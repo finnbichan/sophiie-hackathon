@@ -122,12 +122,23 @@ const CallWindow: React.FC<CallWindowProps> = ({ meetLink, onAudioStreamReady })
   }, [meetLink, onAudioStreamReady]);
 
   const toggleMute = () => {
-    if (localMediaClientRef.current) {
-      localMediaClientRef.current.toggleMicrophone();
-      setIsMuted((prev) => !prev);
-      console.log(`Microphone toggled: ${isMuted ? 'Unmuted' : 'Muted'}`);
+    if (localMediaClientRef.current && userMediaStreamRef.current) {
+      const audioTrack = userMediaStreamRef.current.getAudioTracks()[0];
+      if (audioTrack) {
+        console.log(`toggleMute: Before explicit set, audioTrack.enabled: ${audioTrack.enabled}`);
+        audioTrack.enabled = isMuted; // If isMuted is true, we want to enable (unmute), if false, disable (mute)
+
+        localMediaClientRef.current.toggleMicrophone(); // Call Whereby SDK's toggleMicrophone
+
+        setIsMuted((prev) => {
+          console.log(`toggleMute: After toggle, audioTrack.enabled: ${audioTrack.enabled}. New isMuted state: ${!prev}`);
+          return !prev;
+        });
+      } else {
+        console.warn('toggleMute: No audio track found in local stream.');
+      }
     } else {
-      console.warn('localMediaClient not available to toggle microphone.');
+      console.warn('localMediaClient or userMediaStream not available to toggle microphone.');
     }
   };
 
