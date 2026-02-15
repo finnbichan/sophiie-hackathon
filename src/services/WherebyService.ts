@@ -1,15 +1,8 @@
-// Whereby Service - Handles API calls to Whereby for meeting room management
-// This service now uses ipcRenderer to communicate with the main process for API calls
-// to bypass CORS restrictions in the renderer process.
+// src/services/WherebyService.ts
 
-// Declare `window.ipcRenderer` to avoid TypeScript errors
-declare global {
-  interface Window {
-    ipcRenderer: {
-      invoke: (channel: string, ...args: any[]) => Promise<any>;
-    };
-  }
-}
+// This service handles interaction with the backend for Whereby room management.
+
+// No need for declare global for window.ipcRenderer here anymore, as it's defined in preload.ts
 
 class WherebyService {
   constructor() {

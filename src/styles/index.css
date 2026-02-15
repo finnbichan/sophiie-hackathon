@@ -1,15 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+html, body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+    sans-serif; /* Changed back to Inter */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #1a1a1a; /* Dark background */
+  color: #e0e0e0; /* Light text */
 }
 
 #root {

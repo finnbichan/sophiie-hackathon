@@ -2,7 +2,8 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #fff;
+  background: #1a1a1a; /* Dark background */
+  color: #e0e0e0; /* Default light text */
 }
 
 .end-of-call-container {
@@ -22,17 +23,17 @@
 .end-of-call-summary h1 {
   font-size: 24px;
   margin-bottom: 12px;
-  color: #333;
+  color: #e0e0e0; /* Light text */
 }
 
 .end-of-call-summary p {
-  color: #666;
+  color: #bbb; /* Lighter gray text */
   margin-bottom: 20px;
   line-height: 1.6;
 }
 
 .actions-list {
-  background: #f5f5f5;
+  background: #1f1f1f; /* Slightly darker background */
   padding: 16px;
   border-radius: 8px;
 }
@@ -40,7 +41,7 @@
 .actions-list h2 {
   font-size: 16px;
   margin-bottom: 12px;
-  color: #333;
+  color: #e0e0e0; /* Light text */
 }
 
 .action-item {
@@ -48,29 +49,29 @@
   align-items: center;
   padding: 12px;
   margin-bottom: 8px;
-  background: white;
-  border-left: 4px solid #999;
-  border-radius: 4px;
+  background: #282828; /* Darker item background */
+  border-left: 44px solid #555; /* Subtle border */
+  border-radius: 6px; /* Slightly rounded corners */
 }
 
 .action-item.action-status-completed {
-  border-left-color: #4caf50;
-  background: #e8f5e9;
+  border-left-color: #66bb6a; /* Lighter green */
+  background: #2f3a2f; /* Darker green tint */
 }
 
 .action-item.action-status-approved {
-  border-left-color: #2196f3;
-  background: #e3f2fd;
+  border-left-color: #42a5f5; /* Lighter blue */
+  background: #2f333a; /* Darker blue tint */
 }
 
 .action-item.action-status-pending {
-  border-left-color: #ff9800;
-  background: #fff3e0;
+  border-left-color: #ffb74d; /* Lighter orange */
+  background: #3a332f; /* Darker orange tint */
 }
 
 .action-item.action-status-denied {
-  border-left-color: #f44336;
-  background: #ffebee;
+  border-left-color: #ef5350; /* Lighter red */
+  background: #3a2f2f; /* Darker red tint */
 }
 
 .action-status-badge {
@@ -86,41 +87,41 @@
 }
 
 .action-item.action-status-completed .action-status-badge {
-  background: #4caf50;
+  background: #66bb6a;
   color: white;
 }
 
 .action-item.action-status-approved .action-status-badge {
-  background: #2196f3;
+  background: #42a5f5;
   color: white;
 }
 
 .action-item.action-status-pending .action-status-badge {
-  background: #ff9800;
+  background: #ffb74d;
   color: white;
 }
 
 .action-item.action-status-denied .action-status-badge {
-  background: #f44336;
+  background: #ef5350;
   color: white;
 }
 
 .action-text {
-  color: #333;
+  color: #e0e0e0; /* Light text */
   flex: 1;
 }
 
 .end-of-call-interaction {
   width: 30%;
   min-width: 300px;
-  border: 1px solid #ddd;
+  border: 1px solid #333; /* Subtle dark border */
   border-radius: 8px;
   overflow: hidden;
 }
 
 .end-of-call-footer {
   padding: 16px 20px;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid #333; /* Subtle dark border */
   display: flex;
   justify-content: flex-end;
   gap: 12px;
@@ -128,15 +129,17 @@
 
 .finish-button {
   padding: 12px 24px;
-  background: #2196f3;
+  background: #42a5f5; /* Blue finish button */
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px; /* More rounded */
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
 }
 
 .finish-button:hover {
-  background: #1976d2;
+  background: #1976d2; /* Darker blue on hover */
+  transform: translateY(-1px);
 }

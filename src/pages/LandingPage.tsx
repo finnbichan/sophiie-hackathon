@@ -36,10 +36,10 @@ const LandingPage: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: '20px', maxWidth: '500px', margin: 'auto', fontFamily: 'Arial, sans-serif' }}>
-      <h1>Welcome to meetingmAIte</h1>
-      <div style={{ marginBottom: '15px' }}>
-        <label htmlFor="context-text" style={{ display: 'block', marginBottom: '5px' }}>Meeting Context (optional):</label>
+    <div style={{ padding: '40px', maxWidth: '600px', margin: 'auto', backgroundColor: '#1f1f1f', borderRadius: '12px', boxShadow: '0 4px 10px rgba(0, 0,0, 0.3)' }}>
+      <h1 style={{ marginBottom: '25px', color: '#e0e0e0', textAlign: 'center' }}>Welcome to meetingmAIte</h1>
+      <div style={{ marginBottom: '20px' }}>
+        <label htmlFor="context-text" style={{ display: 'block', marginBottom: '8px', color: '#e0e0e0', fontSize: '1.1em' }}>Meeting Context (optional):</label>
         <textarea
           id="context-text"
           name="contextText"
@@ -47,30 +47,33 @@ const LandingPage: React.FC = () => {
           placeholder="Provide any relevant context for the meeting..."
           value={contextText}
           onChange={(e) => setContextText(e.target.value)}
-          style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}
+          style={{ width: '100%', padding: '10px', border: '1px solid #444', borderRadius: '6px', backgroundColor: '#282828', color: '#e0e0e0', fontSize: '1em', resize: 'vertical' }}
         ></textarea>
       </div>
-      <div style={{ marginBottom: '20px' }}>
-        <label htmlFor="context-files" style={{ display: 'block', marginBottom: '5px' }}>Upload Context Files (optional):</label>
+      <div style={{ marginBottom: '30px' }}>
+        <label htmlFor="context-files" style={{ display: 'block', marginBottom: '8px', color: '#e0e0e0', fontSize: '1.1em' }}>Upload Context Files (optional):</label>
         <input
           type="file"
           id="context-files"
           name="contextFiles"
           multiple
           onChange={handleFileChange}
-          style={{ width: '100%' }}
+          style={{ width: '100%', padding: '10px', border: '1px solid #444', borderRadius: '6px', backgroundColor: '#282828', color: '#e0e0e0', fontSize: '1em' }}
         />
       </div>
       <button
         onClick={handleJoinCall}
         style={{
-          padding: '10px 20px',
-          fontSize: '16px',
-          backgroundColor: '#007bff',
+          padding: '12px 25px',
+          fontSize: '17px',
+          backgroundColor: '#42a5f5', // Blue for primary action
           color: 'white',
           border: 'none',
-          borderRadius: '5px',
+          borderRadius: '8px',
           cursor: 'pointer',
+          fontWeight: 'bold',
+          width: '100%',
+          transition: 'background-color 0.2s ease, transform 0.1s ease',
         }}
       >
         Create and Join Call

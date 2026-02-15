@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import CallWindow from '../components/CallWindow';
 import TranscriptWindow from '../components/TranscriptWindow';
 import ActionWindow from '../components/ActionWindow';
 import InteractionWindow from '../components/InteractionWindow';
 import GroqService from '../services/GroqService';
+import TranscriptionService from '../services/TranscriptionService'; // Import TranscriptionService
 import './CallPage.css';
 
 interface TranscriptEntry {
@@ -45,11 +46,56 @@ const CallPage: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isWhisperMode, setIsWhisperMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [audioStream, setAudioStream] = useState<MediaStream | null>(null); // New state for audio stream
 
   // Initialize Interaction service
   const [groqService] = useState(
     () => new GroqService()
   );
+
+  // Initialize Transcription service
+  const [transcriptionService] = useState(
+    () => new TranscriptionService()
+  );
+
+  // New handler for when the audio stream is ready from CallWindow
+  const handleAudioStreamReady = useCallback((stream: MediaStream) => {
+    console.log('Audio stream ready:', stream);
+    setAudioStream(stream);
+  }, []);
+
+  // Handler for receiving transcription results
+  const handleTranscriptResult = useCallback((transcript: string) => {
+    console.log('Received transcript:', transcript);
+    // For simplicity, add as a new entry. In real app, you might aggregate partials.
+    setTranscripts((prev) => [
+      ...prev,
+      {
+        id: `transcript-${Date.now()}`,
+        speaker: 'Participant', // TODO: Identify speaker
+        text: transcript,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      },
+    ]);
+  }, []);
+
+  // Effect to start/stop transcription when audioStream changes
+  useEffect(() => {
+    if (audioStream) {
+      console.log('Starting transcription...');
+      transcriptionService.startTranscription(audioStream, handleTranscriptResult)
+        .catch((error) => console.error('Error starting transcription:', error));
+    }
+
+    return () => {
+      if (audioStream) {
+        console.log('Stopping transcription...');
+        transcriptionService.stopTranscription()
+          .catch((error) => console.error('Error stopping transcription:', error));
+      }
+    };
+  }, [audioStream, transcriptionService, handleTranscriptResult]);
+
 
   // Mock function to handle sending messages
   const handleSendMessage = (text: string) => {
@@ -152,7 +198,7 @@ const CallPage: React.FC = () => {
           </div>
           <div className="call-container">
             <div className="call-left">
-              <CallWindow meetLink={roomUrl} />
+              <CallWindow meetLink={roomUrl} onAudioStreamReady={handleAudioStreamReady} />
             </div>
             <div className="call-right">
               <div className="call-right-top">

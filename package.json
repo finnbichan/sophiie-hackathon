@@ -42,8 +42,10 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.74.0",
+    "@deepgram/sdk": "^4.11.3",
     "@google/genai": "^1.41.0",
     "@whereby.com/browser-sdk": "^3.18.11",
+    "@whereby.com/camera-effects": "^1.0.2",
     "dotenv": "^17.3.1",
     "electron-squirrel-startup": "^1.0.1",
     "groq-sdk": "^0.37.0",

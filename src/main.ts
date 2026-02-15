@@ -1,6 +1,7 @@
 import { app, BrowserWindow, session, ipcMain } from 'electron';
 import path from 'path';
 import dotenv from 'dotenv';
+import { createClient, DeepgramClient, LiveTranscriptionEvents, LiveClient } from '@deepgram/sdk'; // Import createClient and LiveClient
 
 // Load environment variables from .env file
 dotenv.config();
@@ -34,13 +35,83 @@ const CSP_DOMAINS = {
 const CONTENT_SECURITY_POLICY = `
   default-src 'self' https: data:;
   script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: ${CSP_DOMAINS.cloudfront.join(' ')} ${CSP_DOMAINS.wherebyEmbed.join(' ')} ${CSP_DOMAINS.posthog.join(' ')} ${CSP_DOMAINS.sentry.join(' ')} ${CSP_DOMAINS.helpscout.join(' ')};
-  style-src 'self' 'unsafe-inline' ${CSP_DOMAINS.cloudfront.join(' ')} ${CSP_DOMAINS.wherebyEmbed.join(' ')};
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com ${CSP_DOMAINS.cloudfront.join(' ')} ${CSP_DOMAINS.wherebyEmbed.join(' ')};
+  font-src 'self' https://fonts.gstatic.com;
   connect-src 'self' ${CSP_DOMAINS.geminiApi.join(' ')} ${CSP_DOMAINS.groqApi.join(' ')} ${CSP_DOMAINS.wherebyApi.join(' ')} ${CSP_DOMAINS.wherebyEmbed.join(' ')} ${CSP_DOMAINS.cloudfront.join(' ')} ${CSP_DOMAINS.amazonS3.join(' ')} ${CSP_DOMAINS.posthog.join(' ')} ${CSP_DOMAINS.sentry.join(' ')} ${CSP_DOMAINS.helpscout.join(' ')};
   frame-src 'self' ${CSP_DOMAINS.wherebyEmbed.join(' ')};
 `;
 
 // Clean up newlines and extra spaces
 const CLEAN_CSP = CONTENT_SECURITY_POLICY.replace(/\s{2,}/g, ' ').trim();
+
+// Define Deepgram client and connection globally in main process
+let deepgram: DeepgramClient | null = null;
+let deepgramLive: LiveClient | null = null; // Type will be DeepgramClient.live.v(x)
+
+ipcMain.handle('start-transcription', async (event) => {
+  try {
+    const deepgramApiKey = process.env.REACT_APP_DEEPGRAM_API_KEY;
+    if (!deepgramApiKey) {
+      throw new Error('Deepgram API key is not set in the main process environment variables.');
+    }
+
+    deepgram = createClient(deepgramApiKey);
+    deepgramLive = deepgram.listen.live({
+      smartFormat: true,
+      channels: 1,
+      encoding: 'linear16',
+      sample_rate: 16000,
+      language: 'en-US',
+      // Add other Deepgram options as needed
+    });
+
+    deepgramLive.on(LiveTranscriptionEvents.Open, () => {
+      console.log('Deepgram connection opened.');
+    });
+
+    deepgramLive.on(LiveTranscriptionEvents.Close, () => {
+      console.log('Deepgram connection closed.');
+    });
+
+    deepgramLive.on(LiveTranscriptionEvents.Transcript, (transcription: any) => {
+      const { channel } = transcription;
+      const alternatives = channel.alternatives;
+      const transcript = alternatives[0]?.transcript;
+
+      if (transcript && transcript.length > 0) {
+        // Send transcript back to the renderer process
+        event.sender.send('transcription-result', transcript);
+      }
+    });
+
+    deepgramLive.on(LiveTranscriptionEvents.Error, (error: any) => {
+      console.error('Deepgram error:', error);
+      event.sender.send('transcription-error', error.message);
+    });
+
+    return true;
+  } catch (error) {
+    console.error('Error starting Deepgram transcription in main process:', error);
+    throw error;
+  }
+});
+
+ipcMain.handle('stop-transcription', async () => {
+  if (deepgramLive) {
+    deepgramLive.finish();
+    deepgramLive = null;
+    deepgram = null;
+    console.log('Deepgram transcription stopped.');
+  }
+  return true;
+});
+
+// IPC handler for receiving audio data chunks from the renderer
+ipcMain.handle('audio-data', async (event, audioChunk: ArrayBuffer) => {
+  if (deepgramLive && deepgramLive.getReadyState() === 1) { // Check if connection is open
+    deepgramLive.send(audioChunk);
+  }
+});
 
 // IPC handler for creating Whereby rooms
 ipcMain.handle('create-whereby-room', async (event, endDate: string) => {

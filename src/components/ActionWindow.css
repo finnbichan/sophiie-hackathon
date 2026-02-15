@@ -2,16 +2,18 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  border: 1px solid #ddd;
-  background: #fff;
+  border: 1px solid #333; /* Subtle dark border */
+  background: #1f1f1f; /* Dark background */
   overflow: hidden;
+  border-radius: 8px; /* Consistent rounded corners */
 }
 
 .action-header {
   padding: 12px;
   font-weight: bold;
-  border-bottom: 1px solid #ddd;
-  background: #f5f5f5;
+  border-bottom: 1px solid #333; /* Subtle dark border */
+  background: #282828; /* Darker header background */
+  color: #e0e0e0; /* Light text */
 }
 
 .action-content {
@@ -21,7 +23,7 @@
 }
 
 .action-empty {
-  color: #999;
+  color: #888; /* Lighter gray for dark background */
   text-align: center;
   padding: 40px 12px;
   font-style: italic;
@@ -30,35 +32,35 @@
 .action-item {
   margin-bottom: 12px;
   padding: 12px;
-  border-left: 4px solid #999;
-  background: #f9f9f9;
-  border-radius: 4px;
+  border-left: 4px solid #555; /* Subtle border for general items */
+  background: #282828; /* Darker background for items */
+  border-radius: 6px; /* Slightly rounded corners for items */
 }
 
 .action-item.action-suggestion {
-  border-left-color: #2196f3;
+  border-left-color: #42a5f5; /* Lighter blue */
 }
 
 .action-item.action-reminder {
-  border-left-color: #ff9800;
+  border-left-color: #ffb74d; /* Lighter orange */
 }
 
 .action-item.action-context {
-  border-left-color: #4caf50;
+  border-left-color: #66bb6a; /* Lighter green */
 }
 
 .action-item.action-question {
-  border-left-color: #9c27b0;
+  border-left-color: #ba68c8; /* Lighter purple */
 }
 
 .action-title {
   font-weight: bold;
-  color: #333;
+  color: #e0e0e0; /* Light text */
   margin-bottom: 4px;
 }
 
 .action-description {
-  color: #666;
+  color: #bbb; /* Lighter gray text */
   font-size: 0.9em;
   margin-bottom: 8px;
   line-height: 1.4;
@@ -79,22 +81,23 @@
   cursor: pointer;
   font-size: 0.85em;
   font-weight: bold;
+  transition: background 0.3s ease;
 }
 
 .action-approve {
-  background: #4caf50;
+  background: #66bb6a; /* Lighter green */
   color: white;
 }
 
 .action-approve:hover {
-  background: #45a049;
+  background: #4caf50;
 }
 
 .action-deny {
-  background: #f44336;
+  background: #ef5350; /* Lighter red */
   color: white;
 }
 
 .action-deny:hover {
-  background: #da190b;
+  background: #e53935;
 }

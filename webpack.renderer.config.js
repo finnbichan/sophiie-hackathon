@@ -23,4 +23,7 @@ module.exports = {
   resolve: {
     extensions: ['.js', '.ts', '.jsx', '.tsx', '.css'],
   },
+  ignoreWarnings: [
+    { module: /@whereby\.com\/camera-effects/ },
+  ],
 };

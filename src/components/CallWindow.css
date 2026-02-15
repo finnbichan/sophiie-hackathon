@@ -1,21 +1,80 @@
 .call-window-container {
   width: 100%;
   height: 100%;
-  border: 1px solid #ddd;
+  border: 1px solid #333; /* Subtle dark border */
   background: #000;
-  display: flex; /* Ensure flexbox for centering content */
-  justify-content: center; /* Center content horizontally */
-  align-items: center; /* Center content vertically */
+  display: flex;
+  flex-direction: column; /* Changed to column to stack videos and controls */
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden; /* Ensure content doesn't spill */
 }
 
-.whereby-embed {
+.whereby-core-container {
   width: 100%;
   height: 100%;
-  border: none;
+  display: flex;
+  flex-direction: column; /* Changed to column to stack video and controls */
+  position: relative;
+  overflow: hidden;
+  flex: 1; /* Take available space */
+}
+
+.local-video {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  width: 150px;
+  height: 100px;
+  border: 1px solid #555; /* Subtle border */
+  z-index: 10;
+  object-fit: cover;
+  border-radius: 8px; /* Slightly rounded corners */
+}
+
+.remote-video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #222; /* Darker placeholder background */
+  flex: 1; /* Take available space for video */
 }
 
 .no-meet-link {
-  color: #fff;
+  color: #e0e0e0; /* Light text for dark theme */
   font-size: 1.2em;
   text-align: center;
+}
+
+.call-controls {
+  position: absolute; /* Position relative to .call-window-container */
+  bottom: 20px;
+  display: flex;
+  gap: 10px;
+  background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent dark background */
+  padding: 10px 20px;
+  border-radius: 12px;
+  z-index: 20; /* Ensure controls are above videos */
+}
+
+.call-controls button {
+  padding: 10px 20px;
+  background-color: #3a3a3a; /* Dark button background */
+  color: #e0e0e0; /* Light text */
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.call-controls button:hover {
+  background-color: #505050; /* Lighter on hover */
+  transform: translateY(-1px);
+}
+
+.call-controls button:active {
+  transform: translateY(0);
 }
