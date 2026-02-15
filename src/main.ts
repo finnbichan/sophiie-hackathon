@@ -2,9 +2,17 @@ import { app, BrowserWindow, session, ipcMain } from 'electron';
 import path from 'path';
 import dotenv from 'dotenv';
 import { createClient, DeepgramClient, LiveTranscriptionEvents, LiveClient } from '@deepgram/sdk'; // Import createClient and LiveClient
+import Groq from 'groq-sdk'; // Import Groq SDK
+
+declare const MAIN_WINDOW_WEBPACK_ENTRY: string; // Declare this global variable for TypeScript
 
 // Load environment variables from .env file
 dotenv.config();
+
+// Initialize Groq client
+const groq = new Groq({
+  apiKey: process.env.REACT_APP_GROQ_API_KEY,
+});
 
 const CSP_DOMAINS = {
   // Domains for various services
@@ -15,7 +23,6 @@ const CSP_DOMAINS = {
     'https://*.whereby.com',
     'https://*.sfu.whereby.com',
     'https://*.sfu.svc.whereby.com',
-    'https://*.srv.whereby.com',
     'wss://*.srv.whereby.com', // Added for WebSocket connections
     'https://*.svc.whereby.com',
     'https://*.appearin.net',
@@ -146,6 +153,89 @@ ipcMain.handle('create-whereby-room', async (event, endDate: string) => {
     throw error;
   }
 });
+
+// IPC handler for analyzing transcript with Groq
+ipcMain.handle('analyze-transcript', async (event, transcript: string) => {
+  try {
+    const groqApiKey = process.env.REACT_APP_GROQ_API_KEY;
+    if (!groqApiKey) {
+      throw new Error('Groq API key is not set in the main process environment variables.');
+    }
+
+    const response = await groq.chat.completions.create({
+      model: "openai/gpt-oss-120b", // Using a capable model
+      messages: [
+        { role: "system", content: "Extract actions or questions from the transcript so far. If there are no actions or questions, return type 'null'. Only return the most relevant item if multiple are present." },
+        {
+          role: "user",
+          content: transcript,
+        },
+      ],
+      response_format: {
+        type: "json_schema", // Correct type for structured schema output
+        json_schema: {
+          name: "analysis_result", // A name for our schema
+          strict: true, // Enforce strict schema validation as per user's example
+          schema: {
+            "type": "object",
+            "properties": {
+              "analysis": {
+                              "type": "array",
+                                                          "items": {
+                                                            "type": "object",
+                                                            "properties": {
+                                                              "type": {
+                                                                "type": "string",
+                                                                "enum": ["action", "question", "null"]
+                                                              },
+                                                              "description": { "type": "string" }, // Re-added as optional property here
+                                                              "text": { "type": "string" }         // Re-added as optional property here
+                                                            },
+                                                            "required": ["type"],
+                                                            "additionalProperties": false,
+                                                            "oneOf": [
+                                                              {
+                                                                "properties": {
+                                                                  "type": { "const": "action" }
+                                                                  // description is already defined above as a property, now it's made required below
+                                                                },
+                                                                "required": ["type", "description"],
+                                                                "additionalProperties": false
+                                                              },
+                                                              {
+                                                                "properties": {
+                                                                  "type": { "const": "question" }
+                                                                  // text is already defined above as a property, now it's made required below
+                                                                },
+                                                                "required": ["type", "text"],
+                                                                "additionalProperties": false
+                                                              },
+                                                              {
+                                                                "properties": {
+                                                                  "type": { "const": "null" }
+                                                                },
+                                                                "required": ["type"],
+                                                                "additionalProperties": false
+                                                              }
+                                                            ]
+                                                          }              }
+            },
+            "required": ["analysis"],
+            "additionalProperties": false
+          }
+        }
+      }    });
+
+    const result = JSON.parse(response.choices[0].message.content || "{}");
+    // Ensure the result matches our expected AnalysisResult[] type
+    return result.analysis || []; // Return the array of analysis results
+  } catch (error) {
+    console.error('Error analyzing transcript with Groq:', error);
+    // Return an empty array or null analysis in case of error
+    return [];
+  }
+});
+
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {

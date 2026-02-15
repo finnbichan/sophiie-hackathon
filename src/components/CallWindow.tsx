@@ -173,8 +173,9 @@ const CallWindow: React.FC<CallWindowProps> = ({ meetLink, onAudioStreamReady })
     <div className="call-window-container">
       {meetLink ? (
         <div className="whereby-core-container">
-          <video ref={localVideoRef} autoPlay muted playsInline className="local-video" />
-          <video ref={remoteVideoRef} autoPlay playsInline className="remote-video" />
+          <video ref={remoteVideoRef} autoPlay playsInline className="local-video" />
+          <video ref={localVideoRef} autoPlay muted playsInline className="remote-video" />
+          
           <div className="call-controls">
             <button onClick={toggleMute}>{isMuted ? 'Unmute' : 'Mute'}</button>
             <button onClick={toggleCamera}>{isCameraOff ? 'Turn Camera On' : 'Turn Camera Off'}</button>

@@ -1,11 +1,13 @@
+/// <reference path="../types/window.d.ts" />
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import CallWindow from '../components/CallWindow';
 import TranscriptWindow from '../components/TranscriptWindow';
-import ActionWindow from '../components/ActionWindow';
+import AnalysisWindow from '../components/AnalysisWindow'; // Import AnalysisWindow
 import InteractionWindow from '../components/InteractionWindow';
 import GroqService from '../services/GroqService';
 import TranscriptionService from '../services/TranscriptionService'; // Import TranscriptionService
+import { AnalysisResult } from '../types/analysis'; // Import AnalysisResult type
 import './CallPage.css';
 
 interface TranscriptEntry {
@@ -13,16 +15,6 @@ interface TranscriptEntry {
   speaker: string;
   text: string;
   timestamp: string;
-}
-
-interface Action {
-  id: string;
-  type: 'suggestion' | 'reminder' | 'context' | 'question';
-  title: string;
-  description?: string;
-  requiresApproval?: boolean;
-  onApprove?: () => void;
-  onDeny?: () => void;
 }
 
 interface Message {
@@ -35,14 +27,14 @@ interface Message {
 const CallPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { roomUrl, contextText, contextFiles } = (location.state || {}) as {
+  const { roomUrl, /* @ts-ignore */ contextText, /* @ts-ignore */ contextFiles } = (location.state || {}) as {
     roomUrl?: string;
     contextText?: string;
     contextFiles?: File[];
   };
 
   const [transcripts, setTranscripts] = useState<TranscriptEntry[]>([]);
-  const [actions, setActions] = useState<Action[]>([]);
+  const [analysisResults, setAnalysisResults] = useState<AnalysisResult[]>([]); // New state for analysis results
   const [messages, setMessages] = useState<Message[]>([]);
   const [isWhisperMode, setIsWhisperMode] = useState(false);
   const [whisper, setWhisper] = useState(''); // State for current whisper input
@@ -180,16 +172,33 @@ const CallPage: React.FC = () => {
     };
   }, [isWhisperMode]);
 
-  // Generate suggestions when transcript updates
+  // Effect for periodic transcript analysis
   useEffect(() => {
-    if (transcripts.length > 0 && actions.length === 0) {
-      const transcriptText = transcripts
-        .map((t) => `${t.speaker}: ${t.text}`)
-        .join('\n');
+    const analyzeInterval = setInterval(async () => {
+      if (transcripts.length > 0) {
+        const fullTranscript = transcripts
+          .map((t) => `${t.speaker}: ${t.text}`)
+          .join('\n');
 
-      // Future: transcript-aware features handled by separate audio service
-    }
-  }, [transcripts.length, actions.length, groqService]);
+        try {
+          const result = await window.ipcRenderer.analyzeTranscript(fullTranscript);
+          if (result && result.length > 0) {
+            setAnalysisResults(result); // Update with the latest analysis
+          } else {
+            setAnalysisResults([]); // Clear if no new analysis
+          }
+        } catch (error) {
+          console.error('Error fetching analysis from main process:', error);
+          setAnalysisResults([]);
+        }
+      } else {
+        setAnalysisResults([]); // Clear analysis if no transcript
+      }
+    }, 5000); // Every 5 seconds
+
+    return () => clearInterval(analyzeInterval);
+  }, [transcripts]); // Re-run effect if transcripts change (to get latest content for analysis)
+
 
   return (
     <>
@@ -213,7 +222,8 @@ const CallPage: React.FC = () => {
                 <TranscriptWindow transcripts={transcripts} />
               </div>
               <div className="call-right-middle">
-                <ActionWindow actions={actions} />
+                {/* Replaced ActionWindow with AnalysisWindow */}
+                <AnalysisWindow analysisResults={analysisResults} />
               </div>
               <div className="call-right-bottom">
                 <InteractionWindow

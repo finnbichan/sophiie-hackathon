@@ -8,4 +8,5 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
   removeListener: (channel: string, listener: (...args: any[]) => void) => {
     ipcRenderer.removeListener(channel, listener);
   },
+  analyzeTranscript: (transcript: string) => ipcRenderer.invoke('analyze-transcript', transcript),
 });
